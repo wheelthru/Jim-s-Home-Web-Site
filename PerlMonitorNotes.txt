@@ -1,5 +1,5 @@
 Notes on structure of perl sensor-reading program
-Line numbers based on 485poll22.plx
+Line numbers (in parens) based on 485poll22.plx
 
 uses some external packages:
 	Term::ReadKey for live keypress detection
@@ -21,49 +21,51 @@ uses some external packages:
 
 (157) Start cron threads for sprinkler scheduler
 
-(187) sub to check length, opcode of new message
+(187) sub: lenOcChk  checks length, opcode of new message
 
-(208) sub logit logging function - main output to data file.  Is this still used?
+(208) sub: logit logging function - main output to data file.  Is this still used?
 
-(228) sub logit2  - used?
+(228) sub: logit2  - used?
 
-(243) main block of references to per-sensor processing routines.  Names are like $rainref for rain sensor.  Currently 10 are defined - not all used in production.
+(243) main block of per-sensor processing routines.  References to these subs are names $rainref for rain sensor.  Currently 10 are defined - not all used in production.
 
 (565) open main data log file - some kind of option to open a test log file?
 
-(596) Set up a hash of metadata for each sensor:
+(596) Set up hash %sensors of metadata for each sensor:
 	name
 	addr
 	poll rate
 	kind of data returned (?)
 	also hash of err counts
+	
+	This might be the place to start a morph to actual OO code?
 
-(707) Seems to be reverse lookup addr->name?
+(707) Set up array @names indexed by sensor addr for reverse lookup addr->name.
 
-(716)  MAIN POLL ONE SENSOR ROUTINE pollit()
+(716) MAIN POLL ONE SENSOR ROUTINE sub: pollit()  This sends poll messages out on the 485 bus.
 
-(766)  sub checkit - validate received message
+(766) sub: checkit - validate received message
 
-(842) sub logRestart - log that a sensor restarted
+(842) sub: logRestart - log that a sensor restarted
 
-(852) sub logMsg - main data logger??
+(852) sub: logMsg - main data logger??
 
-(867) sub readit - main read loop - lots of logic here
+(867) sub: readit - MAIN READ ROUTINE - reads serial, handles valid, invalid responses, does retries, calls the sensor-specific handler in $sensors{sensor_name}
 
 (962) MAIN LOOP
 	- handle sprinkler cron job
 	- loop thru all configured sensors using pollit, readit
-	- check transit process, restart if needed (starts it initially?)
+	- check transport process, restart if needed (starts it initially?)
 	- if time to update web site, send data
 	- sleep with keyboard hot key checks - lots of code
 
-(1347) sub cronDispatch - dsipatcher for cron process
+(1347) sub: cronDispatch - dispatcher for cron process
 
 (1359) main cron thread code
 
-(1377) sub shortTS - timestamp utility
+(1377) sub: shortTS - timestamp utility
 
-(1390) SMS alert stuff
+(1390) SMS alert stuff to text me if sensors fail, etc
 
 (1443) Transport child process code
 	- (1447) transport main loop
